@@ -2,8 +2,10 @@ use crate::prelude::*;
 
 #[system]
 pub fn map_render(#[resource] map: &Map, #[resource] camera: &Camera) {
+    const Z_ORDER: usize = 0;
+
     let mut draw_batch = DrawBatch::new();
-    draw_batch.target(0);
+    draw_batch.target(MAP_LAYER);
 
     for y in camera.top_y..=camera.bottom_y {
         for x in camera.left_x..=camera.right_x {
@@ -22,5 +24,5 @@ pub fn map_render(#[resource] map: &Map, #[resource] camera: &Camera) {
         }
     }
 
-    draw_batch.submit(0).expect("Batch error");
+    draw_batch.submit(Z_ORDER).expect("Batch error");
 }

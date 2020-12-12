@@ -14,6 +14,10 @@ pub mod prelude {
     pub const HUD_WIDTH: i32 = SCREEN_WIDTH * 2;
     pub const HUD_HEIGHT: i32 = SCREEN_HEIGHT * 2;
 
+    pub const MAP_LAYER: usize = 0;
+    pub const DISPLAY_LAYER: usize = 1;
+    pub const HUD_LAYER: usize = 2;
+
     pub use crate::camera::*;
     pub use crate::components::*;
     pub use crate::map::*;
@@ -71,15 +75,15 @@ impl State {
 
 impl GameState for State {
     fn tick(&mut self, ctx: &mut BTerm) {
-        ctx.set_active_console(0);
+        ctx.set_active_console(MAP_LAYER);
         ctx.cls();
-        ctx.set_active_console(1);
+        ctx.set_active_console(DISPLAY_LAYER);
         ctx.cls();
-        ctx.set_active_console(2);
+        ctx.set_active_console(HUD_LAYER);
         ctx.cls();
 
         // Inputs.
-        ctx.set_active_console(0);
+        ctx.set_active_console(MAP_LAYER);
         self.resources.insert(ctx.key);
         self.resources.insert(Point::from_tuple(ctx.mouse_pos()));
 

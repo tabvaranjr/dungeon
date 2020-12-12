@@ -5,11 +5,13 @@ use crate::prelude::*;
 #[read_component(Name)]
 #[read_component(Health)]
 pub fn tooltips(ecs: &SubWorld, #[resource] mouse_pos: &Point, #[resource] camera: &Camera) {
+    const Z_ORDER: usize = 10100;
+    
     let offset = Point::new(camera.left_x, camera.top_y);
     let map_pos = *mouse_pos + offset;
 
     let mut draw_batch = DrawBatch::new();
-    draw_batch.target(2);
+    draw_batch.target(HUD_LAYER);
 
     let mut positions = <(Entity, &Point, &Name)>::query();
     positions
@@ -26,5 +28,5 @@ pub fn tooltips(ecs: &SubWorld, #[resource] mouse_pos: &Point, #[resource] camer
             draw_batch.print(screen_pos, &display);
         });
 
-    draw_batch.submit(10100).expect("Batch error");
+    draw_batch.submit(Z_ORDER).expect("Batch error");
 }
