@@ -5,7 +5,7 @@ use crate::prelude::*;
 #[read_component(Render)]
 pub fn entity_render(ecs: &SubWorld, #[resource] camera: &Camera) {
     const Z_ORDER: usize = 5000;
-    
+
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(DISPLAY_LAYER);
     let offset = Point::new(camera.left_x, camera.top_y);

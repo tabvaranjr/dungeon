@@ -6,7 +6,7 @@ use crate::prelude::*;
 #[read_component(Health)]
 pub fn tooltips(ecs: &SubWorld, #[resource] mouse_pos: &Point, #[resource] camera: &Camera) {
     const Z_ORDER: usize = 10100;
-    
+
     let offset = Point::new(camera.left_x, camera.top_y);
     let map_pos = *mouse_pos + offset;
 
