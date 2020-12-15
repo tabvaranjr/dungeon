@@ -12,6 +12,7 @@ pub fn spawn_player(ecs: &mut World, pos: Point) {
             current: 30,
             max: 30,
         },
+        FieldOfView::new(8),
     ));
 }
 
@@ -36,6 +37,7 @@ pub fn spawn_monster(ecs: &mut World, pos: Point, rng: &mut RandomNumberGenerato
             max: hp,
         },
         Name(name),
+        FieldOfView::new(6),
     ));
 }
 
@@ -46,9 +48,9 @@ pub fn spawn_amulet_of_yala(ecs: &mut World, pos: Point) {
         pos,
         Render {
             color: ColorPair::new(WHITE, BLACK),
-            glyph: to_cp437('|')
+            glyph: to_cp437('|'),
         },
-        Name("Amulet of Yala".to_string())
+        Name("Amulet of Yala".to_string()),
     ));
 }
 

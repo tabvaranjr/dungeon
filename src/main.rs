@@ -99,8 +99,18 @@ impl State {
         ctx.set_active_console(HUD_LAYER);
 
         ctx.print_color_centered(2, RED, BLACK, "VICTOLY!");
-        ctx.print_color_centered(4, WHITE, BLACK, "You put on your wizard hat and the amulet of Yala.");
-        ctx.print_color_centered(5, WHITE, BLACK, "Power over 9000 course through your veins and you pwn every evil beast.");
+        ctx.print_color_centered(
+            4,
+            WHITE,
+            BLACK,
+            "You put on your wizard hat and the amulet of Yala.",
+        );
+        ctx.print_color_centered(
+            5,
+            WHITE,
+            BLACK,
+            "Power over 9000 course through your veins and you pwn every evil beast.",
+        );
         ctx.print_color_centered(6, WHITE, BLACK, "Time for retirement!");
         ctx.print_color_centered(9, GREEN, BLACK, "Press '1' to regret thy life again");
 
@@ -113,9 +123,24 @@ impl State {
         ctx.set_active_console(HUD_LAYER);
 
         ctx.print_color_centered(2, RED, BLACK, "Thou art dead!");
-        ctx.print_color_centered(4, WHITE, BLACK, "Slain and teabagged by a monster, thou art shamed ungracefully.");
-        ctx.print_color_centered(5, WHITE, BLACK, "The Amulet of Yala remains unclaimed, and your hometown is getting seriously pwn3d.");
-        ctx.print_color_centered(8, YELLOW, BLACK, "Does thy want to get brutally slain again?");
+        ctx.print_color_centered(
+            4,
+            WHITE,
+            BLACK,
+            "Slain and teabagged by a monster, thou art shamed ungracefully.",
+        );
+        ctx.print_color_centered(
+            5,
+            WHITE,
+            BLACK,
+            "The Amulet of Yala remains unclaimed, and your hometown is getting seriously pwn3d.",
+        );
+        ctx.print_color_centered(
+            8,
+            YELLOW,
+            BLACK,
+            "Does thy want to get brutally slain again?",
+        );
         ctx.print_color_centered(9, GREEN, BLACK, "Press '1' to regret thy life again.");
 
         if let Some(VirtualKeyCode::Key1) = ctx.key {
@@ -155,7 +180,7 @@ impl GameState for State {
             }
             TurnState::GameOver => {
                 self.game_over(ctx);
-            },
+            }
             TurnState::Victory => {
                 self.victory(ctx);
             }

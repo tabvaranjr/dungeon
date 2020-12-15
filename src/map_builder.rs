@@ -28,15 +28,17 @@ impl MapBuilder {
             SCREEN_HEIGHT,
             &vec![mb.map.point2d_to_index(mb.player_start)],
             &mb.map,
-            1024.0
+            1024.0,
         );
         mb.amulet_start = mb.map.index_to_point2d(
-            dijkstra_map.map
+            dijkstra_map
+                .map
                 .iter()
                 .enumerate()
-                .filter(|(_,dist)| *dist < &std::f32::MAX)
-                .max_by(|a,b| a.1.partial_cmp(b.1).unwrap())
-                .unwrap().0
+                .filter(|(_, dist)| *dist < &std::f32::MAX)
+                .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
+                .unwrap()
+                .0,
         );
 
         mb

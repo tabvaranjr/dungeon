@@ -19,7 +19,7 @@ pub fn end_turn(ecs: &SubWorld, #[resource] turn_state: &mut TurnState) {
     let amulet_pos = amulet.iter(ecs).nth(0).unwrap();
 
     let mut player_hp = <(&Health, &Point)>::query().filter(component::<Player>());
-    player_hp.iter(ecs).for_each(|(hp,pos)| {
+    player_hp.iter(ecs).for_each(|(hp, pos)| {
         if hp.current < 1 {
             new_state = TurnState::GameOver;
         }
