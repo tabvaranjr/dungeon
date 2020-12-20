@@ -1,36 +1,59 @@
 use crate::prelude::*;
+use automata::*;
+use drunkard::*;
+use empty::*;
+use prefab::*;
+use rooms::*;
+
+mod automata;
+mod drunkard;
+mod empty;
+mod prefab;
+mod rooms;
+
+trait MapArchitect {
+    fn build(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder;
+}
 
 const NUM_ROOMS: usize = 20;
+const NUM_MONSTERS: usize = 50;
 
 pub struct MapBuilder {
     pub map: Map,
     pub rooms: Vec<Rect>,
+    pub monster_spawns: Vec<Point>,
     pub player_start: Point,
     pub amulet_start: Point,
 }
 
 impl MapBuilder {
     pub fn build(rng: &mut RandomNumberGenerator) -> Self {
-        let mut mb = MapBuilder {
-            map: Map::new(),
-            rooms: Vec::new(),
-            player_start: Point::zero(),
-            amulet_start: Point::zero(),
+        let mut architect: Box<dyn MapArchitect> = match rng.range(0, 3) {
+            0 => Box::new(RoomsArchitect::new()),
+            1 => Box::new(CellularAutomataArchitect::new()),
+            _ => Box::new(DrunkardsWalkArchitect::new()),
         };
 
-        mb.fill(TileType::Wall);
-        mb.build_random_rooms(rng);
-        mb.build_corridors(rng);
-        mb.player_start = mb.rooms[0].center();
+        let mut mb = architect.build(rng);
+        apply_prefab(&mut mb, rng);
 
+        mb
+    }
+
+    fn fill(&mut self, tile: TileType) {
+        self.map.tiles.iter_mut().for_each(|t| *t = tile);
+    }
+
+    fn find_most_distant(&self) -> Point {
         let dijkstra_map = DijkstraMap::new(
             SCREEN_WIDTH,
             SCREEN_HEIGHT,
-            &vec![mb.map.point2d_to_index(mb.player_start)],
-            &mb.map,
+            &vec![self.map.point2d_to_index(self.player_start)],
+            &self.map,
             1024.0,
         );
-        mb.amulet_start = mb.map.index_to_point2d(
+
+        self.map.index_to_point2d(
             dijkstra_map
                 .map
                 .iter()
@@ -39,13 +62,7 @@ impl MapBuilder {
                 .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
                 .unwrap()
                 .0,
-        );
-
-        mb
-    }
-
-    fn fill(&mut self, tile: TileType) {
-        self.map.tiles.iter_mut().for_each(|t| *t = tile);
+        )
     }
 
     fn build_random_rooms(&mut self, rng: &mut RandomNumberGenerator) {
@@ -111,5 +128,29 @@ impl MapBuilder {
                 self.apply_horizontal_tunnel(prev.x, new.x, new.y);
             }
         }
+    }
+
+    fn spawn_monsters(&self, start: &Point, rng: &mut RandomNumberGenerator) -> Vec<Point> {
+        let mut spawnable_tiles: Vec<Point> = self
+            .map
+            .tiles
+            .iter()
+            .enumerate()
+            .filter(|(idx, t)| {
+                **t == TileType::Floor
+                    && DistanceAlg::Pythagoras.distance2d(*start, self.map.index_to_point2d(*idx))
+                        > 10.0
+            })
+            .map(|(idx, _)| self.map.index_to_point2d(idx))
+            .collect();
+
+        let mut spawns = Vec::new();
+        for _ in 0..NUM_MONSTERS {
+            let target_index = rng.random_slice_index(&spawnable_tiles).unwrap();
+            spawns.push(spawnable_tiles[target_index].clone());
+            spawnable_tiles.remove(target_index);
+        }
+
+        spawns
     }
 }
