@@ -21,6 +21,7 @@ pub fn player_input(
             VirtualKeyCode::Right => Point::new(1, 0),
             VirtualKeyCode::Up => Point::new(0, -1),
             VirtualKeyCode::Down => Point::new(0, 1),
+            VirtualKeyCode::Escape => std::process::exit(0),
             _ => Point::new(0, 0),
         };
 
