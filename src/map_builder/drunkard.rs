@@ -1,9 +1,7 @@
 use super::MapArchitect;
 use crate::prelude::*;
 
-pub struct DrunkardsWalkArchitect {
-    map: Map,
-}
+pub struct DrunkardsWalkArchitect {}
 
 const STAGGER_DISTANCE: usize = 400;
 const NUM_TILES: usize = (SCREEN_WIDTH * SCREEN_HEIGHT) as usize;
@@ -11,7 +9,7 @@ const DESIRED_FLOOR: usize = NUM_TILES / 3;
 
 impl DrunkardsWalkArchitect {
     pub fn new() -> Self {
-        Self { map: Map::new() }
+        Self { }
     }
 
     fn drunkard(&mut self, start: &Point, rng: &mut RandomNumberGenerator, map: &mut Map) {
