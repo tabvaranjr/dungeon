@@ -9,7 +9,7 @@ const DESIRED_FLOOR: usize = NUM_TILES / 3;
 
 impl DrunkardsWalkArchitect {
     pub fn new() -> Self {
-        Self { }
+        Self {}
     }
 
     fn drunkard(&mut self, start: &Point, rng: &mut RandomNumberGenerator, map: &mut Map) {
