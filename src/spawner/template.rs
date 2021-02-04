@@ -29,8 +29,8 @@ pub struct Templates {
 }
 
 impl Templates {
-    pub fn load() -> Self {
-        let file = File::open("resources/template.ron").expect("Failed opening file");
+    pub fn load(file: &str) -> Self {
+        let file = File::open(file).expect("Failed opening file");
         de::from_reader(file).expect("Unable to load templates")
     }
 
