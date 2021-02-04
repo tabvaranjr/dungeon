@@ -192,7 +192,12 @@ impl State {
             map_builder.map.tiles[exit_idx] = TileType::Exit;
         }
 
-        spawn_level(&mut self.ecs, &mut rng, map_level as usize, &map_builder.monster_spawns);
+        spawn_level(
+            &mut self.ecs,
+            &mut rng,
+            map_level as usize,
+            &map_builder.monster_spawns,
+        );
 
         self.resources.insert(map_builder.map);
         self.resources.insert(Camera::new(map_builder.player_start));

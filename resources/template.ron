@@ -1,5 +1,6 @@
 Templates(
     entities: [
+        // Items
         Template(
             entity_type: Item,
             name: "Weak Healing Potion",
@@ -18,19 +19,48 @@ Templates(
         ),
         Template(
             entity_type: Item,
-            name: "Dungeon Map",
+            name: "Ye Olde Dungeon Map",
             glyph: '{',
             levels : [ 0, 1 ],
             provides: Some([("MagicMap", 0)]),
             frequency: 1,
         ),
+
+        // Weapons
+        Template(
+            entity_type: Item,
+            name: "Crappy Sword",
+            glyph: 's',
+            levels: [ 0, 1, 2 ],
+            frequency: 1,
+            base_damage: Some(1),
+        ),
+        Template(
+            entity_type: Item,
+            name: "Broad Sword",
+            glyph: 'S',
+            levels: [ 0, 1, 2 ],
+            frequency: 1,
+            base_damage: Some(2),
+        ),
+        Template(
+            entity_type: Item,
+            name: "Humongous Sword",
+            glyph: '/',
+            levels: [ 1, 2 ],
+            frequency: 1,
+            base_damage: Some(4),
+        ),
+
+        // Enemies
         Template(
             entity_type: Enemy,
             name: "Goblin",
             glyph: 'g',
-            levels : [ 0, 1, 2 ],
+            levels : [ 0 ],
             hp: Some(1),
             frequency: 3,
+            base_damage: Some(1),
         ),
         Template(
             entity_type: Enemy,
@@ -39,6 +69,7 @@ Templates(
             levels : [ 0, 1, 2 ],
             hp: Some(2),
             frequency: 2,
+            base_damage: Some(1),
         ),
         Template(
             entity_type: Enemy,
@@ -46,15 +77,17 @@ Templates(
             glyph: 'O',
             levels : [ 1, 2 ],
             hp: Some(5),
-            frequency: 2,
+            frequency: 1,
+            base_damage: Some(2),
         ),
         Template(
             entity_type: Enemy,
             name: "Ettin",
-            glyph: 'o',
+            glyph: 'E',
             levels : [ 2 ],
-            hp: Some(8),
+            hp: Some(10),
             frequency: 1,
+            base_damage: Some(3),
         ),
     ]
 )
