@@ -30,10 +30,16 @@ pub fn hud(ecs: &SubWorld) {
         ColorPair::new(WHITE, RED),
     );
 
-    let player = <(Entity, &Player)>::query()
+    let (player, map_level) = <(Entity, &Player)>::query()
         .iter(ecs)
-        .find_map(|(entity, _)| Some(*entity))
+        .find_map(|(entity, player)| Some((*entity, player.map_level)))
         .unwrap();
+
+    draw_batch.print_color_right(
+        Point::new(SCREEN_WIDTH * 2, 1),
+        format!("Dungeon Level: Over 900{}", map_level),
+        ColorPair::new(YELLOW, BLACK),
+    );
 
     let mut item_query = <(&Item, &Name, &Carried)>::query();
     let mut y = 3;
