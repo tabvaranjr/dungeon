@@ -63,6 +63,10 @@ impl Algorithm2D for Map {
     fn dimensions(&self) -> Point {
         Point::new(SCREEN_WIDTH, SCREEN_HEIGHT)
     }
+
+    fn in_bounds(&self, point: Point) -> bool {
+        self.in_bounds(point)
+    }
 }
 
 impl BaseMap for Map {
