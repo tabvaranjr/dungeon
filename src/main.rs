@@ -7,7 +7,7 @@ mod state;
 mod systems;
 mod turn_state;
 
-pub mod prelude {
+mod prelude {
     pub const SCREEN_WIDTH: i32 = 80;
     pub const SCREEN_HEIGHT: i32 = 50;
     pub const DISPLAY_WIDTH: i32 = SCREEN_WIDTH / 2;

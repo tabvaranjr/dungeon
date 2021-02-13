@@ -21,6 +21,7 @@ pub trait MapTheme: Sync + Send {
 
 const NUM_ROOMS: usize = 20;
 const NUM_MONSTERS: usize = 50;
+const UNREACHABLE: &f32= &std::f32::MAX;
 
 pub struct MapBuilder {
     pub map: Map,
@@ -69,7 +70,7 @@ impl MapBuilder {
                 .map
                 .iter()
                 .enumerate()
-                .filter(|(_, dist)| *dist < &std::f32::MAX)
+                .filter(|(_, dist)| *dist < UNREACHABLE)
                 .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
                 .unwrap()
                 .0,
