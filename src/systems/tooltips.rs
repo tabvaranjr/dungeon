@@ -23,7 +23,7 @@ pub fn tooltips(ecs: &SubWorld, #[resource] mouse_pos: &Point, #[resource] camer
         .iter(ecs)
         .filter(|(_, pos, _)| **pos == map_pos && player_fov.visible_tiles.contains(&pos))
         .for_each(|(entity, _, name)| {
-            let screen_pos = *mouse_pos * 4;
+            let screen_pos = *mouse_pos * HUD_DISPLAY_RATIO;
             let display =
                 if let Ok(health) = ecs.entry_ref(*entity).unwrap().get_component::<Health>() {
                     format!("{}: {} HP", &name.0, health.current)
