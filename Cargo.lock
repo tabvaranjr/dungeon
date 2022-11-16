@@ -77,7 +77,8 @@ checksum = "0d8c1fef690941d3e7788d328517591fecc684c084084702d6ff1641e993699a"
 [[package]]
 name = "bracket-algorithm-traits"
 version = "0.8.7"
-source = "git+https://github.com/amethyst/bracket-lib#851f6f08675444fb6fa088b9e67bee9fd75554c6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4a13fb98ac33e6cd03fc035d8503f8a80b38c523737c9f84b400a4b9e065cfd3"
 dependencies = [
  "bracket-geometry",
  "smallvec",
@@ -86,7 +87,8 @@ dependencies = [
 [[package]]
 name = "bracket-color"
 version = "0.8.7"
-source = "git+https://github.com/amethyst/bracket-lib#851f6f08675444fb6fa088b9e67bee9fd75554c6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7333827cf727ceb302cc4f638cc8befc87f5f1423873255d94cc0a24009e940a"
 dependencies = [
  "lazy_static",
  "parking_lot 0.12.1",
@@ -95,7 +97,8 @@ dependencies = [
 [[package]]
 name = "bracket-embedding"
 version = "0.8.7"
-source = "git+https://github.com/amethyst/bracket-lib#851f6f08675444fb6fa088b9e67bee9fd75554c6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c1cb6747f25903066109a619e3d580ef5ff7b3ffc281fa51ece473e1396e2298"
 dependencies = [
  "lazy_static",
  "parking_lot 0.12.1",
@@ -104,7 +107,8 @@ dependencies = [
 [[package]]
 name = "bracket-geometry"
 version = "0.8.7"
-source = "git+https://github.com/amethyst/bracket-lib#851f6f08675444fb6fa088b9e67bee9fd75554c6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0f31b525fcd65027885f3a1e3a250a5dd397d70de4a6a5a125f03e0bef951499"
 dependencies = [
  "ultraviolet",
 ]
@@ -112,7 +116,8 @@ dependencies = [
 [[package]]
 name = "bracket-lib"
 version = "0.8.7"
-source = "git+https://github.com/amethyst/bracket-lib#851f6f08675444fb6fa088b9e67bee9fd75554c6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "43bbe13e39628e7f73673737c825001494dee7329cee8ee79dfeaa7cfd136dbf"
 dependencies = [
  "bracket-algorithm-traits",
  "bracket-color",
@@ -126,7 +131,8 @@ dependencies = [
 [[package]]
 name = "bracket-noise"
 version = "0.8.7"
-source = "git+https://github.com/amethyst/bracket-lib#851f6f08675444fb6fa088b9e67bee9fd75554c6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0b7443d0990c69db7a83f376f0101d684c20a911698e5f932bffbda2c8b08dd"
 dependencies = [
  "bracket-random",
 ]
@@ -134,7 +140,8 @@ dependencies = [
 [[package]]
 name = "bracket-pathfinding"
 version = "0.8.7"
-source = "git+https://github.com/amethyst/bracket-lib#851f6f08675444fb6fa088b9e67bee9fd75554c6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "32ae7f2ebf242316ba10e84ca3b31af064b8c0c77402b2171a3104a2a77718fc"
 dependencies = [
  "bracket-algorithm-traits",
  "bracket-geometry",
@@ -145,7 +152,8 @@ dependencies = [
 [[package]]
 name = "bracket-random"
 version = "0.8.7"
-source = "git+https://github.com/amethyst/bracket-lib#851f6f08675444fb6fa088b9e67bee9fd75554c6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "437be61484077b1ddb57002ce3c96b7d03cbf500b5d15157ee7e67e22332c39b"
 dependencies = [
  "getrandom",
  "js-sys",
@@ -159,7 +167,8 @@ dependencies = [
 [[package]]
 name = "bracket-rex"
 version = "0.8.7"
-source = "git+https://github.com/amethyst/bracket-lib#851f6f08675444fb6fa088b9e67bee9fd75554c6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c4735d15070b98d0f07360d62914d1524679325019cae46c7af73637a6ef196a"
 dependencies = [
  "bracket-color",
  "bracket-embedding",
@@ -170,7 +179,8 @@ dependencies = [
 [[package]]
 name = "bracket-terminal"
 version = "0.8.7"
-source = "git+https://github.com/amethyst/bracket-lib#851f6f08675444fb6fa088b9e67bee9fd75554c6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2493063cb676e2e9e3a3a630eee032a297e43c8a1cee08c94feaad3344ed0b46"
 dependencies = [
  "anyhow",
  "bracket-color",
@@ -201,9 +211,9 @@ checksum = "572f695136211188308f16ad2ca5c851a712c464060ae6974944458eb83880ba"
 
 [[package]]
 name = "bytemuck"
-version = "1.12.1"
+version = "1.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f5715e491b5a1598fc2bef5a606847b5dc1d48ea625bd3c02c00de8285591da"
+checksum = "aaa3a8d9a1ca92e282c96a32d6511b695d7d994d1d102ba85d279f9b2756947f"
 
 [[package]]
 name = "byteorder"
@@ -223,9 +233,9 @@ dependencies = [
 
 [[package]]
 name = "calloop"
-version = "0.10.1"
+version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a22a6a8f622f797120d452c630b0ab12e1331a1a753e2039ce7868d4ac77b4ee"
+checksum = "595eb0438b3c6d262395fe30e6de9a61beb57ea56290b00a07f227fe6e20cbf2"
 dependencies = [
  "log",
  "nix 0.24.2",
@@ -236,9 +246,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.0.73"
+version = "1.0.76"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2fff2a6927b3bb87f9595d67196a70493f627687a71d87a0d692242c33f58c11"
+checksum = "76a284da2e6fe2092f2353e51713435363112dfd60030e22add80be333fb928f"
 
 [[package]]
 name = "cfg-if"
@@ -263,18 +273,18 @@ dependencies = [
 
 [[package]]
 name = "cmake"
-version = "0.1.48"
+version = "0.1.49"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8ad8cef104ac57b68b89df3208164d228503abbdce70f6880ffa3d970e7443a"
+checksum = "db34956e100b30725f2eb215f90d4871051239535632f84fea3bc92722c66b7c"
 dependencies = [
  "cc",
 ]
 
 [[package]]
 name = "cocoa"
-version = "0.24.0"
+version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f63902e9223530efb4e26ccd0cf55ec30d592d3b42e21a28defc42a9586e832"
+checksum = "f425db7937052c684daec3bd6375c8abe2d146dca4b8b143d6db777c39138f3a"
 dependencies = [
  "bitflags",
  "block",
@@ -636,7 +646,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f82b0f4c27ad9f8bfd1f3208d882da2b09c301bc1c828fd3a00d0216d2fbbff6"
 dependencies = [
  "crc32fast",
- "miniz_oxide",
+ "miniz_oxide 0.5.4",
 ]
 
 [[package]]
@@ -831,9 +841,9 @@ checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 
 [[package]]
 name = "image"
-version = "0.24.4"
+version = "0.24.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd8e4fb07cf672b1642304e731ef8a6a4c7891d67bb4fd4f5ce58cd6ed86803c"
+checksum = "69b7ea949b537b0fd0af141fff8c77690f2ce96f4f41f042ccb6c69c6c965945"
 dependencies = [
  "bytemuck",
  "byteorder",
@@ -873,9 +883,9 @@ checksum = "8eaf4bc02d17cbdd7ff4c7438cafcdf7fb9a4613313ad11b4f8fefe7d3fa0130"
 
 [[package]]
 name = "jpeg-decoder"
-version = "0.2.6"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9478aa10f73e7528198d75109c8be5cd7d15fb530238040148d5f9a22d4c5b3b"
+checksum = "bc0000e42512c92e31c2252315bda326620a4e034105e900c98ec492fa077b3e"
 
 [[package]]
 name = "js-sys"
@@ -940,9 +950,9 @@ checksum = "fc7fcc620a3bff7cdd7a365be3376c97191aeaccc2a603e600951e452615bf89"
 
 [[package]]
 name = "libloading"
-version = "0.7.3"
+version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "efbc0f03f9a775e9f6aed295c6a1ba2253c5757a9e03d55c6caa46a681abcddd"
+checksum = "b67380fd3b2fbe7527a606e18729d21c6f3951633d0500574c4dc22d2d638b9f"
 dependencies = [
  "cfg-if 1.0.0",
  "winapi",
@@ -999,9 +1009,9 @@ dependencies = [
 
 [[package]]
 name = "memmap2"
-version = "0.5.7"
+version = "0.5.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95af15f345b17af2efc8ead6080fb8bc376f8cec1b35277b935637595fe77498"
+checksum = "4b182332558b18d807c4ce1ca8ca983b34c3ee32765e47b3f0f69b90355cc1dc"
 dependencies = [
  "libc",
 ]
@@ -1026,6 +1036,15 @@ name = "miniz_oxide"
 version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "96590ba8f175222643a85693f33d26e9c8a015f599c216509b1a6894af675d34"
+dependencies = [
+ "adler",
+]
+
+[[package]]
+name = "miniz_oxide"
+version = "0.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b275950c28b37e794e8c55d88aeb5e139d0ce23fdbbeda68f8d7174abdf9e8fa"
 dependencies = [
  "adler",
 ]
@@ -1201,9 +1220,9 @@ dependencies = [
 
 [[package]]
 name = "num_cpus"
-version = "1.13.1"
+version = "1.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19e64526ebdee182341572e50e9ad03965aa510cd94427a4549448f285e957a1"
+checksum = "f6058e64324c71e02bc2b150e4f3bc8286db6c83092132ffa3f6b1eab0f9def5"
 dependencies = [
  "hermit-abi",
  "libc",
@@ -1250,9 +1269,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.15.0"
+version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e82dad04139b71a90c080c8463fe0dc7902db5192d939bd0950f074d014339e1"
+checksum = "86f0b0d4bf799edbc74508c1e8bf170ff5f41238e5f8225603ca7caaae2b7860"
 
 [[package]]
 name = "osmesa-sys"
@@ -1331,14 +1350,14 @@ checksum = "6ac9a59f73473f1b8d852421e59e64809f025994837ef743615c6d0c5b305160"
 
 [[package]]
 name = "png"
-version = "0.17.6"
+version = "0.17.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f0e7f4c94ec26ff209cee506314212639d6c91b80afb82984819fafce9df01c"
+checksum = "5d708eaf860a19b19ce538740d2b4bdeeb8337fa53f7738455e706623ad5c638"
 dependencies = [
  "bitflags",
  "crc32fast",
  "flate2",
- "miniz_oxide",
+ "miniz_oxide 0.6.2",
 ]
 
 [[package]]
@@ -1447,9 +1466,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c4eb3267174b8c6c2f654116623910a0fef09c4753f8dd83db29c48a0df988b"
+checksum = "e076559ef8e241f2ae3479e36f97bd5741c0330689e217ad51ce2c76808b868a"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -1458,9 +1477,9 @@ dependencies = [
 
 [[package]]
 name = "regex-syntax"
-version = "0.6.27"
+version = "0.6.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3f87b73ce11b1619a3c6332f45341e0047173771e8b8b73f87bfeefb7b56244"
+checksum = "456c603be3e8d448b072f410900c09faf164fbce2d480456f50eea6e25f9c848"
 
 [[package]]
 name = "ron"
@@ -1493,9 +1512,9 @@ dependencies = [
 
 [[package]]
 name = "scoped-tls"
-version = "1.0.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea6a9290e3c9cf0f18145ef7ffa62d68ee0bf5fcd651017e586dc7fd5da448c2"
+checksum = "e1cf6437eb19a8f4a6cc0f7dca544973b0b78843adbfeb3683d1a94a0024a294"
 
 [[package]]
 name = "scopeguard"
@@ -1622,11 +1641,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f307c47d32d2715eb2e0ece5589057820e0e5e70d07c247d1063e844e107f454"
 dependencies = [
  "bitflags",
- "calloop 0.10.1",
+ "calloop 0.10.2",
  "dlib",
  "lazy_static",
  "log",
- "memmap2 0.5.7",
+ "memmap2 0.5.8",
  "nix 0.24.2",
  "pkg-config",
  "wayland-client",
