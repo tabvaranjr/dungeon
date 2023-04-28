@@ -2,55 +2,50 @@ use super::MapArchitect;
 use crate::prelude::*;
 
 const FLOOR_PCT: i32 = 55;
+const ALGO_ITERS: usize = 10;
 
-pub struct CellularAutomataArchitect {}
+pub struct CellularAutomataArchitect;
 
 impl CellularAutomataArchitect {
-    pub fn new() -> Self {
-        Self {}
-    }
-
     fn random_noise_map(&mut self, rng: &mut RandomNumberGenerator, map: &mut Map) {
         map.tiles.iter_mut().for_each(|t| {
             let roll = rng.range(0, 100);
-            *t = if roll > FLOOR_PCT {
-                TileType::Floor
+            if roll > FLOOR_PCT {
+                *t = TileType::Floor
             } else {
-                TileType::Wall
+                *t = TileType::Wall;
             }
         });
     }
 
     fn count_neighbors(&self, x: i32, y: i32, map: &Map) -> usize {
-        let mut neighborgs = 0;
-
+        let mut neighbors = 0;
         for iy in -1..=1 {
             for ix in -1..=1 {
                 if !(ix == 0 && iy == 0) && map.tiles[map_idx(x + ix, y + iy)] == TileType::Wall {
-                    neighborgs += 1;
+                    neighbors += 1;
                 }
             }
         }
 
-        neighborgs
+        neighbors
     }
 
     fn iteration(&mut self, map: &mut Map) {
         let mut new_tiles = map.tiles.clone();
         for y in 1..SCREEN_HEIGHT - 1 {
             for x in 1..SCREEN_WIDTH - 1 {
-                let neighborgs = self.count_neighbors(x, y, map);
+                let neighbors = self.count_neighbors(x, y, map);
                 let idx = map_idx(x, y);
-
-                new_tiles[idx] = if neighborgs > 4 || neighborgs == 0 {
-                    TileType::Wall
+                if neighbors > 4 || neighbors == 0 {
+                    new_tiles[idx] = TileType::Wall;
                 } else {
-                    TileType::Floor
+                    new_tiles[idx] = TileType::Floor;
                 }
             }
         }
 
-        map.tiles = new_tiles.clone();
+        map.tiles = new_tiles;
     }
 
     fn find_start(&self, map: &Map) -> Point {
@@ -60,13 +55,13 @@ impl CellularAutomataArchitect {
             .iter()
             .enumerate()
             .filter(|(_, t)| **t == TileType::Floor)
-            .map(|(idx, _)| {
+            .map(|(idx, _x)| {
                 (
                     idx,
                     DistanceAlg::Pythagoras.distance2d(center, map.index_to_point2d(idx)),
                 )
             })
-            .min_by(|(_, distance), (_, distance2)| distance.partial_cmp(&distance2).unwrap())
+            .min_by(|(_, distance), (_, distance2)| distance.partial_cmp(distance2).unwrap())
             .map(|(idx, _)| idx)
             .unwrap();
 
@@ -82,11 +77,11 @@ impl MapArchitect for CellularAutomataArchitect {
             monster_spawns: Vec::new(),
             player_start: Point::zero(),
             amulet_start: Point::zero(),
-            theme: super::themes::DungeonTheme::new(),
+            theme: DynamicMapTheme(super::themes::DungeonTheme::new()),
         };
 
         self.random_noise_map(rng, &mut mb.map);
-        for _ in 0..10 {
+        for _ in 0..ALGO_ITERS {
             self.iteration(&mut mb.map);
         }
 

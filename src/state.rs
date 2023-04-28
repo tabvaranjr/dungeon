@@ -1,35 +1,36 @@
 use crate::prelude::*;
 
 pub struct State {
-    ecs: World,
-    resources: Resources,
-    input_systems: Schedule,
-    player_systems: Schedule,
-    monster_systems: Schedule,
+    pub ecs: World,
+    pub input_systems: Schedule,
+    pub player_systems: Schedule,
+    pub monster_systems: Schedule,
 }
 
 impl State {
     pub fn new() -> Self {
         let mut ecs = World::default();
-        let mut resources = Resources::default();
         let mut rng = RandomNumberGenerator::new();
-        let mut map_builder = MapBuilder::build(&mut rng);
+        let mut map_builder = MapBuilder::new(&mut rng);
 
         spawn_player(&mut ecs, map_builder.player_start);
-
+        
         spawn_level(&mut ecs, &mut rng, 0, &map_builder.monster_spawns);
 
         let exit_idx = map_builder.map.point2d_to_index(map_builder.amulet_start);
         map_builder.map.tiles[exit_idx] = TileType::Exit;
 
-        resources.insert(map_builder.map);
-        resources.insert(Camera::new(map_builder.player_start));
-        resources.insert(TurnState::AwaitingInput);
-        resources.insert(map_builder.theme);
+        ecs.insert_resource(map_builder.map);
+        ecs.insert_resource(Camera::new(map_builder.player_start));
+        ecs.insert_resource(TurnState::AwaitingInput);
+        ecs.insert_resource(map_builder.theme);
+
+        ecs.insert_resource(Events::<WantsToMove>::default());
+        ecs.insert_resource(Events::<WantsToAttack>::default());
+        ecs.insert_resource(Events::<ActivateItem>::default());
 
         Self {
             ecs,
-            resources,
             input_systems: build_input_scheduler(),
             player_systems: build_player_scheduler(),
             monster_systems: build_monster_scheduler(),
@@ -38,20 +39,28 @@ impl State {
 
     fn reset_game_state(&mut self) {
         self.ecs = World::default();
-        self.resources = Resources::default();
+        self.input_systems = build_input_scheduler();
+        self.player_systems = build_player_scheduler();
+        self.monster_systems = build_monster_scheduler();
         let mut rng = RandomNumberGenerator::new();
-        let mut map_builder = MapBuilder::build(&mut rng);
+        let mut map_builder = MapBuilder::new(&mut rng);
 
         spawn_player(&mut self.ecs, map_builder.player_start);
+
         spawn_level(&mut self.ecs, &mut rng, 0, &map_builder.monster_spawns);
 
         let exit_idx = map_builder.map.point2d_to_index(map_builder.amulet_start);
         map_builder.map.tiles[exit_idx] = TileType::Exit;
 
-        self.resources.insert(map_builder.map);
-        self.resources.insert(Camera::new(map_builder.player_start));
-        self.resources.insert(TurnState::AwaitingInput);
-        self.resources.insert(map_builder.theme);
+        self.ecs.insert_resource(map_builder.map);
+        self.ecs
+            .insert_resource(Camera::new(map_builder.player_start));
+        self.ecs.insert_resource(TurnState::AwaitingInput);
+        self.ecs.insert_resource(map_builder.theme);
+
+        self.ecs.insert_resource(Events::<WantsToMove>::default());
+        self.ecs.insert_resource(Events::<WantsToAttack>::default());
+        self.ecs.insert_resource(Events::<ActivateItem>::default());
     }
 
     fn victory(&mut self, ctx: &mut BTerm) {
@@ -108,47 +117,48 @@ impl State {
     }
 
     fn advance_level(&mut self) {
-        let player_entity = <Entity>::query()
-            .filter(component::<Player>())
-            .iter(&self.ecs)
-            .nth(0)
-            .unwrap();
+        let player_entity = self
+            .ecs
+            .query_filtered::<Entity, With<Player>>()
+            .single(&self.ecs);
 
         use std::collections::HashSet;
         let mut entities_to_keep = HashSet::new();
-        entities_to_keep.insert(*player_entity);
+        entities_to_keep.insert(player_entity);
 
-        <(Entity, &Carried)>::query()
+        self.ecs
+            .query::<(Entity, &Carried)>()
             .iter(&self.ecs)
-            .filter(|(_, carry)| carry.0 == *player_entity)
+            .filter(|(_, carry)| carry.0 == player_entity)
             .map(|(e, _)| e)
             .for_each(|e| {
-                entities_to_keep.insert(*e);
+                entities_to_keep.insert(e);
             });
 
-        let mut cb = CommandBuffer::new(&self.ecs);
-        for e in Entity::query().iter(&self.ecs) {
+        let all_entities: Vec<Entity> = self.ecs.iter_entities().collect();
+        for e in all_entities.iter() {
             if !entities_to_keep.contains(e) {
-                cb.remove(*e);
+                self.ecs.despawn(*e);
             }
         }
-        cb.flush(&mut self.ecs);
 
-        <&mut FieldOfView>::query()
+        self.ecs
+            .query::<&mut FieldOfView>()
             .iter_mut(&mut self.ecs)
-            .for_each(|fov| fov.is_dirty = true);
+            .for_each(|mut fov| fov.is_dirty = true);
 
         let mut rng = RandomNumberGenerator::new();
-        let mut map_builder = MapBuilder::build(&mut rng);
+        let mut map_builder = MapBuilder::new(&mut rng);
 
         let mut map_level = 0;
-        <(&mut Player, &mut Point)>::query()
+        self.ecs
+            .query::<(&mut Player, &mut Position)>()
             .iter_mut(&mut self.ecs)
-            .for_each(|(player, pos)| {
+            .for_each(|(mut player, mut pos)| {
                 player.map_level += 1;
                 map_level = player.map_level;
-                pos.x = map_builder.player_start.x;
-                pos.y = map_builder.player_start.y;
+                pos.0.x = map_builder.player_start.x;
+                pos.0.y = map_builder.player_start.y;
             });
 
         if map_level == 2 {
@@ -165,10 +175,11 @@ impl State {
             &map_builder.monster_spawns,
         );
 
-        self.resources.insert(map_builder.map);
-        self.resources.insert(Camera::new(map_builder.player_start));
-        self.resources.insert(TurnState::AwaitingInput);
-        self.resources.insert(map_builder.theme);
+        self.ecs.insert_resource(map_builder.map);
+        self.ecs
+            .insert_resource(Camera::new(map_builder.player_start));
+        self.ecs.insert_resource(TurnState::AwaitingInput);
+        self.ecs.insert_resource(map_builder.theme);
     }
 }
 
@@ -180,39 +191,24 @@ impl GameState for State {
         ctx.cls();
         ctx.set_active_console(HUD_LAYER);
         ctx.cls();
-
-        // Inputs.
         ctx.set_active_console(MAP_LAYER);
-        self.resources.insert(ctx.key);
-        self.resources.insert(Point::from_tuple(ctx.mouse_pos()));
 
-        // Update.
-        let current_state = self.resources.get::<TurnState>().unwrap().clone();
+        // Execute systems.
+        self.ecs.insert_resource(KeyCode(ctx.key));
+        self.ecs
+            .insert_resource(MousePosition(Point::from_tuple(ctx.mouse_pos())));
+
+        let current_state = self.ecs.get_resource::<TurnState>().unwrap();
         match current_state {
-            TurnState::AwaitingInput => {
-                self.input_systems
-                    .execute(&mut self.ecs, &mut self.resources);
-            }
-            TurnState::PlayerTurn => {
-                self.player_systems
-                    .execute(&mut self.ecs, &mut self.resources);
-            }
-            TurnState::MonsterTurn => {
-                self.monster_systems
-                    .execute(&mut self.ecs, &mut self.resources);
-            }
-            TurnState::GameOver => {
-                self.game_over(ctx);
-            }
-            TurnState::Victory => {
-                self.victory(ctx);
-            }
-            TurnState::NextLevel => {
-                self.advance_level();
-            }
+            TurnState::AwaitingInput => self.input_systems.run(&mut self.ecs),
+            TurnState::PlayerTurn => self.player_systems.run(&mut self.ecs),
+            TurnState::MonsterTurn => self.monster_systems.run(&mut self.ecs),
+            TurnState::GameOver => self.game_over(ctx),
+            TurnState::Victory => self.victory(ctx),
+            TurnState::NextLevel => self.advance_level(),
         };
 
-        // Render.
+        // Render draw buffers.
         render_draw_buffer(ctx).expect("Render error");
     }
 }

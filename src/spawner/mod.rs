@@ -17,16 +17,16 @@ pub fn spawn_level(
 }
 
 pub fn spawn_player(ecs: &mut World, pos: Point) {
-    ecs.push((
+    ecs.spawn((
         Player { map_level: 0 },
-        pos,
+        Position(pos),
         Render {
             color: ColorPair::new(WHITE, BLACK),
             glyph: to_cp437('@'),
         },
         Health {
-            current: 20,
-            max: 20,
+            current: 10,
+            max: 10,
         },
         FieldOfView::new(8),
         Damage(1),
@@ -34,10 +34,10 @@ pub fn spawn_player(ecs: &mut World, pos: Point) {
 }
 
 pub fn spawn_amulet_of_yala(ecs: &mut World, pos: Point) {
-    ecs.push((
+    ecs.spawn((
         Item,
         AmuletOfYala,
-        pos,
+        Position(pos),
         Render {
             color: ColorPair::new(WHITE, BLACK),
             glyph: to_cp437('|'),

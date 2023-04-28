@@ -1,12 +1,14 @@
 mod camera;
 mod components;
+mod events;
 mod map;
 mod map_builder;
+mod prelude;
+mod resources;
 mod spawner;
 mod state;
 mod systems;
 mod turn_state;
-mod prelude;
 
 use prelude::*;
 
@@ -24,5 +26,5 @@ fn main() -> BError {
         .with_fps_cap(30.0)
         .build()?;
 
-    main_loop(context, state::State::new())
+    main_loop(context, State::new())
 }

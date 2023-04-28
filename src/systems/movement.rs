@@ -1,24 +1,23 @@
 use crate::prelude::*;
 
-#[system(for_each)]
-#[read_component(Player)]
-#[read_component(FieldOfView)]
 pub fn movement(
-    entity: &Entity,
-    want_move: &WantsToMove,
-    #[resource] map: &mut Map,
-    #[resource] camera: &mut Camera,
-    ecs: &mut SubWorld,
-    commands: &mut CommandBuffer,
+    mut event_reader: EventReader<WantsToMove>,
+    mut map: ResMut<Map>,
+    mut camera: ResMut<Camera>,
+    mut commands: Commands,
+    player: Query<Entity, With<Player>>,
+    fov: Query<&FieldOfView>,
 ) {
-    if map.can_enter_tile(want_move.destination) {
-        commands.add_component(want_move.entity, want_move.destination);
+    for want_move in event_reader.iter() {
+        if map.can_enter_tile(want_move.destination) {
+            commands
+                .entity(want_move.entity)
+                .insert(Position(want_move.destination));
 
-        if let Ok(entry) = ecs.entry_ref(want_move.entity) {
-            if let Ok(fov) = entry.get_component::<FieldOfView>() {
-                commands.add_component(want_move.entity, fov.clone_dirty());
+            if let Ok(fov) = fov.get(want_move.entity) {
+                commands.entity(want_move.entity).insert(fov.clone_dirty());
 
-                if entry.get_component::<Player>().is_ok() {
+                if player.get(want_move.entity).is_ok() {
                     camera.on_player_move(want_move.destination);
                     fov.visible_tiles.iter().for_each(|pos| {
                         map.revealed_tiles[map_idx(pos.x, pos.y)] = true;
@@ -27,6 +26,4 @@ pub fn movement(
             }
         }
     }
-
-    commands.remove(*entity);
 }

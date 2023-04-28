@@ -1,36 +1,46 @@
 use crate::prelude::*;
 
-#[system]
-#[read_component(ActivateItem)]
-#[read_component(ProvidesHealing)]
-#[write_component(Health)]
-#[read_component(ProvidesDungeonMap)]
-pub fn use_items(ecs: &mut SubWorld, commands: &mut CommandBuffer, #[resource] map: &mut Map) {
+pub fn use_items(
+    mut event_reader: EventReader<ActivateItem>,
+    effects: Query<
+        (
+            Entity,
+            Option<&ProvidesHealing>,
+            Option<&ProvidesDungeonMap>,
+        ),
+        With<Item>,
+    >,
+    mut health_query: Query<(Entity, &mut Health)>,
+    mut commands: Commands,
+    mut map: ResMut<Map>,
+) {
     let mut healing_to_apply = Vec::<(Entity, i32)>::new();
 
-    <(Entity, &ActivateItem)>::query()
-        .iter(ecs)
-        .for_each(|(entity, activate)| {
-            let item = ecs.entry_ref(activate.item);
-            if let Ok(item) = item {
-                if let Ok(healing) = item.get_component::<ProvidesHealing>() {
-                    healing_to_apply.push((activate.used_by, healing.amount));
+    for used_item in event_reader.iter() {
+        let item = used_item.item;
+
+        effects
+            .iter()
+            .filter(|(entity, _, _)| *entity == item)
+            .for_each(|(_, healing, mapper)| {
+                if let Some(healing) = healing {
+                    healing_to_apply.push((used_item.used_by, healing.amount));
                 }
 
-                if let Ok(_) = item.get_component::<ProvidesDungeonMap>() {
+                if let Some(_mapper) = mapper {
                     map.revealed_tiles.iter_mut().for_each(|t| *t = true);
                 }
-            }
+            });
 
-            commands.remove(activate.item);
-            commands.remove(*entity);
-        });
+        commands.entity(item).despawn();
+    }
 
     for heal in healing_to_apply.iter() {
-        if let Ok(mut target) = ecs.entry_mut(heal.0) {
-            if let Ok(health) = target.get_component_mut::<Health>() {
+        health_query
+            .iter_mut()
+            .filter(|(entity, _)| *entity == heal.0)
+            .for_each(|(_, mut health)| {
                 health.current = i32::min(health.max, health.current + heal.1);
-            }
-        }
+            });
     }
 }

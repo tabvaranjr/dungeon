@@ -9,6 +9,7 @@ pub enum TileType {
     Exit,
 }
 
+#[derive(Resource)]
 pub struct Map {
     pub tiles: Vec<TileType>,
     pub revealed_tiles: Vec<bool>,

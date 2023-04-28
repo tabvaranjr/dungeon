@@ -1,17 +1,11 @@
 use crate::prelude::*;
 
-#[system]
-#[read_component(Health)]
-#[read_component(Player)]
-#[read_component(Item)]
-#[read_component(Carried)]
-#[read_component(Name)]
-pub fn hud(ecs: &SubWorld) {
-    const Z_ORDER: usize = 10000;
-
-    let mut health_query = <&Health>::query().filter(component::<Player>());
-
-    let player_health = health_query.iter(ecs).nth(0).unwrap();
+pub fn hud(
+    health_query: Query<&Health, With<Player>>,
+    player_query: Query<(Entity, &Player), With<Player>>,
+    item_query: Query<(&Name, &Carried), With<Item>>,
+) {
+    let player_health = health_query.single();
 
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(HUD_LAYER);
@@ -26,27 +20,27 @@ pub fn hud(ecs: &SubWorld) {
     );
     draw_batch.print_color_centered(
         0,
-        format!("HP: {}/{}", player_health.current, player_health.max),
+        format!("Health: {}/{}", player_health.current, player_health.max),
         ColorPair::new(WHITE, RED),
     );
 
-    let (player, map_level) = <(Entity, &Player)>::query()
-        .iter(ecs)
-        .find_map(|(entity, player)| Some((*entity, player.map_level)))
+    let (player, map_level) = player_query
+        .iter()
+        .map(|(entity, player)| (entity, player.map_level))
+        .next()
         .unwrap();
 
     draw_batch.print_color_right(
         Point::new(SCREEN_WIDTH * 2, 1),
-        format!("Dungeon Level: Over 900{}", map_level),
+        format!("Dungeon Level: Over 900{}", map_level + 1),
         ColorPair::new(YELLOW, BLACK),
     );
 
-    let mut item_query = <(&Item, &Name, &Carried)>::query();
     let mut y = 3;
     item_query
-        .iter(ecs)
-        .filter(|(_, _, carried)| carried.0 == player)
-        .for_each(|(_, name, _)| {
+        .iter()
+        .filter(|(_, carried)| carried.0 == player)
+        .for_each(|(name, _)| {
             draw_batch.print(Point::new(3, y), format!("{}: {}", y - 2, &name.0));
             y += 1;
         });
@@ -59,5 +53,5 @@ pub fn hud(ecs: &SubWorld) {
         );
     }
 
-    draw_batch.submit(Z_ORDER).expect("Batch error");
+    draw_batch.submit(10000).expect("Batch error");
 }

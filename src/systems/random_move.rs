@@ -1,56 +1,37 @@
 use crate::prelude::*;
 
-#[system]
-#[read_component(Point)]
-#[read_component(MovingRandomly)]
-#[read_component(Health)]
-#[read_component(Player)]
-pub fn random_move(ecs: &SubWorld, commands: &mut CommandBuffer) {
-    let mut movers = <(Entity, &Point, &MovingRandomly)>::query();
-    let mut positions = <(Entity, &Point, &Health)>::query();
-
-    movers.iter(ecs).for_each(|(entity, pos, _)| {
+pub fn random_move(
+    movers: Query<(Entity, &Position), With<MovingRandomly>>,
+    positions: Query<(Entity, &Position), With<Player>>,
+    mut move_event: EventWriter<WantsToMove>,
+    mut attack_event: EventWriter<WantsToAttack>,
+) {
+    for (entity, position) in &movers {
         let mut rng = RandomNumberGenerator::new();
-        let delta = match rng.range(0, 4) {
+        let destination = match rng.range(0, 4) {
             0 => Point::new(-1, 0),
             1 => Point::new(1, 0),
             2 => Point::new(0, -1),
             _ => Point::new(0, 1),
-        };
-
-        let destination = *pos + delta;
+        } + position.0;
 
         let mut attacked = false;
         positions
-            .iter(ecs)
-            .filter(|(_, target_pos, _)| **target_pos == destination)
-            .for_each(|(victim, _, _)| {
-                if ecs
-                    .entry_ref(*victim)
-                    .unwrap()
-                    .get_component::<Player>()
-                    .is_ok()
-                {
-                    commands.push((
-                        (),
-                        WantsToAttack {
-                            attacker: *entity,
-                            victim: *victim,
-                        },
-                    ));
-                }
-
+            .iter()
+            .filter(|(_, target_pos)| target_pos.0 == destination)
+            .for_each(|(victim, _)| {
+                attack_event.send(WantsToAttack {
+                    attacker: entity,
+                    victim,
+                });
                 attacked = true;
             });
 
         if !attacked {
-            commands.push((
-                (),
-                WantsToMove {
-                    entity: *entity,
-                    destination,
-                },
-            ));
+            move_event.send(WantsToMove {
+                entity,
+                destination,
+            });
         }
-    });
+    }
 }
