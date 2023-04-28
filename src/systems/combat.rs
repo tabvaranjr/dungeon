@@ -1,85 +1,78 @@
 use crate::prelude::*;
 
-#[system]
-#[read_component(WantsToAttack)]
-#[read_component(Player)]
-#[write_component(Health)]
-#[read_component(Damage)]
-#[read_component(Carried)]
-#[read_component(Name)]
-pub fn combat(ecs: &mut SubWorld, commands: &mut CommandBuffer) {
-    let mut attackers = <(Entity, &WantsToAttack)>::query();
+pub fn combat(
+    mut event_reader: EventReader<WantsToAttack>,
+    attackers: Query<(Entity, Option<&Damage>), Without<Carried>>,
+    mut victims: Query<(Entity, Option<&mut Health>)>,
+    weapons: Query<(&Carried, &Damage)>,
+    player: Query<Entity, With<Player>>,
+    names: Query<(Entity, &Name)>,
+    mut commands: Commands,
+) {
+    for event in event_reader.iter() {
+        let attacker = attackers
+            .iter()
+            .find(|(entity, _)| event.attacker == *entity);
 
-    let victims: Vec<(Entity, Entity, Entity)> = attackers
-        .iter(ecs)
-        .map(|(entity, attack)| (*entity, attack.attacker, attack.victim))
-        .collect();
+        let is_player_attacker = player.single() == event.attacker;
+        let is_player_victim = player.single() == event.victim;
 
-    victims.iter().for_each(|(message, attacker, victim)| {
-        let is_player_victim = ecs
-            .entry_ref(*victim)
-            .unwrap()
-            .get_component::<Player>()
-            .is_ok();
+        victims
+            .iter_mut()
+            .filter(|(entity, _)| event.victim == *entity)
+            .for_each(|(entity, health)| {
+                let base_damage = if let Some(v) = attacker {
+                    if let Some(dmg) = v.1 {
+                        dmg.0
+                    } else {
+                        0
+                    }
+                } else {
+                    0
+                };
 
-        let attacker_name = if let Ok(attacker) = ecs.entry_ref(*attacker) {
-            if attacker.get_component::<Player>().is_ok() {
-                String::from("Player")
-            } else if let Ok(name) = attacker.get_component::<Name>() {
-                name.0.clone()
-            } else {
-                String::from("Unknown")
-            }
-        } else {
-            String::from("Unknown")
-        };
+                let attacker_name = if is_player_attacker {
+                    String::from("Player")
+                } else {
+                    let name = names.iter().find(|(e, _)| *e == event.attacker).map(|(_, n)| n);
+                    if let Some(name) = name {
+                        name.0.clone()
+                    } else {
+                        String::from("Unknown")
+                    }
+                };
 
-        let victim_name = if let Ok(victim) = ecs.entry_ref(*victim) {
-            if victim.get_component::<Player>().is_ok() {
-                String::from("Player")
-            } else if let Ok(name) = victim.get_component::<Name>() {
-                name.0.clone()
-            } else {
-                String::from("Unknown")
-            }
-        } else {
-            String::from("Unknown")
-        };
+                let victim_name = if is_player_victim {
+                    String::from("Player")
+                } else {
+                    let name = names.iter().find(|(e, _)| *e == event.victim).map(|(_, n)| n);
+                    if let Some(name) = name {
+                        name.0.clone()
+                    } else {
+                        String::from("Unknown")
+                    }
+                };
 
-        let base_damage = if let Ok(v) = ecs.entry_ref(*attacker) {
-            if let Ok(dmg) = v.get_component::<Damage>() {
-                dmg.0
-            } else {
-                0
-            }
-        } else {
-            0
-        };
+                let weapon_damage: i32 = weapons
+                    .iter()
+                    .filter(|(carried, _)| carried.0 == attacker.unwrap().0)
+                    .map(|(_, dmg)| dmg.0)
+                    .sum();
 
-        let weapon_damage: i32 = <(&Carried, &Damage)>::query()
-            .iter(ecs)
-            .filter(|(carried, _)| carried.0 == *attacker)
-            .map(|(_, dmg)| dmg.0)
-            .sum();
+                let final_damage = base_damage + weapon_damage;
 
-        let final_damage = base_damage + weapon_damage;
+                if let Some(mut health) = health {
+                    println!(
+                        "{} attacks that poor {} for {} damage!",
+                        attacker_name, victim_name, final_damage
+                    );
+                    health.current -= final_damage;
+                    println!("{} has {} / {} HP", victim_name, health.current, health.max);
 
-        println!(
-            "{} attacks {} for {} damage.",
-            attacker_name, victim_name, final_damage
-        );
-
-        if let Ok(mut health) = ecs
-            .entry_mut(*victim)
-            .unwrap()
-            .get_component_mut::<Health>()
-        {
-            health.current -= final_damage;
-            if health.current < 1 && !is_player_victim {
-                commands.remove(*victim);
-            }
-        }
-
-        commands.remove(*message);
-    });
+                    if health.current < 1 && !is_player_victim {
+                        commands.entity(entity).despawn();
+                    }
+                }
+            });
+    }
 }

@@ -1,7 +1,5 @@
 use crate::prelude::*;
-
-use legion::systems::CommandBuffer;
-use ron::de;
+use ron::de::from_reader;
 use serde::Deserialize;
 use std::collections::HashSet;
 use std::fs::File;
@@ -32,7 +30,7 @@ pub struct Templates {
 impl Templates {
     pub fn load(file: &str) -> Self {
         let file = File::open(file).expect("Failed opening file");
-        de::from_reader(file).expect("Unable to load templates")
+        from_reader(file).expect("Unable to load templates")
     }
 
     pub fn spawn_entities(
@@ -52,18 +50,16 @@ impl Templates {
                 }
             });
 
-        let mut commands = CommandBuffer::new(ecs);
         spawn_points.iter().for_each(|pt| {
             if let Some(entity) = rng.random_slice_entry(&available_entities) {
-                self.spawn_entity(pt, entity, &mut commands);
+                self.spawn_entity(pt, entity, ecs);
             }
         });
-        commands.flush(ecs);
     }
 
-    fn spawn_entity(&self, pt: &Point, template: &Template, commands: &mut CommandBuffer) {
-        let entity = commands.push((
-            pt.clone(),
+    pub fn spawn_entity(&self, pt: &Point, template: &Template, ecs: &mut World) {
+        let mut entity = ecs.spawn((
+            Position(*pt),
             Render {
                 color: ColorPair::new(WHITE, BLACK),
                 glyph: to_cp437(template.glyph),
@@ -72,18 +68,17 @@ impl Templates {
         ));
 
         match template.entity_type {
-            EntityType::Item => commands.add_component(entity, Item),
+            EntityType::Item => {
+                entity.insert(Item {});
+            }
             EntityType::Enemy => {
-                commands.add_component(entity, Enemy);
-                commands.add_component(entity, FieldOfView::new(6));
-                commands.add_component(entity, ChasingPlayer);
-                commands.add_component(
-                    entity,
-                    Health {
-                        current: template.hp.unwrap(),
-                        max: template.hp.unwrap(),
-                    },
-                );
+                entity.insert(Enemy {});
+                entity.insert(FieldOfView::new(6));
+                entity.insert(ChasingPlayer {});
+                entity.insert(Health {
+                    current: template.hp.unwrap(),
+                    max: template.hp.unwrap(),
+                });
             }
         }
 
@@ -91,16 +86,22 @@ impl Templates {
             effects
                 .iter()
                 .for_each(|(provides, n)| match provides.as_str() {
-                    "Healing" => commands.add_component(entity, ProvidesHealing { amount: *n }),
-                    "MagicMap" => commands.add_component(entity, ProvidesDungeonMap),
-                    _ => println!("Warning: don't know how to provide {}", provides),
+                    "Healing" => {
+                        entity.insert(ProvidesHealing { amount: *n });
+                    }
+                    "MagicMap" => {
+                        entity.insert(ProvidesDungeonMap);
+                    }
+                    _ => {
+                        println!("Warning: we don't know how to provide {}", provides);
+                    }
                 });
         }
 
         if let Some(damage) = &template.base_damage {
-            commands.add_component(entity, Damage(*damage));
+            entity.insert(Damage(*damage));
             if template.entity_type == EntityType::Item {
-                commands.add_component(entity, Weapon);
+                entity.insert(Weapon{});
             }
         }
     }

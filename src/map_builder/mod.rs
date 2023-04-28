@@ -7,9 +7,12 @@ use themes::*;
 
 mod automata;
 mod drunkard;
+mod empty;
 mod prefab;
 mod rooms;
 mod themes;
+
+const NUM_ROOMS: usize = 20;
 
 trait MapArchitect {
     fn build(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder;
@@ -19,48 +22,46 @@ pub trait MapTheme: Sync + Send {
     fn tile_to_render(&self, tile_type: TileType) -> FontCharType;
 }
 
-const NUM_ROOMS: usize = 20;
-const NUM_MONSTERS: usize = 50;
-const UNREACHABLE: &f32= &std::f32::MAX;
-
+#[derive(Resource)]
 pub struct MapBuilder {
     pub map: Map,
     pub rooms: Vec<Rect>,
     pub monster_spawns: Vec<Point>,
     pub player_start: Point,
     pub amulet_start: Point,
-    pub theme: Box<dyn MapTheme>,
+    pub theme: DynamicMapTheme,
 }
 
 impl MapBuilder {
-    pub fn build(rng: &mut RandomNumberGenerator) -> Self {
+    pub fn new(rng: &mut RandomNumberGenerator) -> Self {
         let mut architect: Box<dyn MapArchitect> = match rng.range(0, 3) {
-            0 => Box::new(RoomsArchitect::new()),
-            1 => Box::new(CellularAutomataArchitect::new()),
-            _ => Box::new(DrunkardsWalkArchitect::new()),
+            0 => Box::new(DrunkardsWalkArchitect {}),
+            1 => Box::new(RoomsArchitect {}),
+            _ => Box::new(CellularAutomataArchitect {}),
         };
 
         let mut mb = architect.build(rng);
         apply_prefab(&mut mb, rng);
 
         mb.theme = match rng.range(0, 2) {
-            0 => DungeonTheme::new(),
-            1 => ForestTheme::new(),
-            _ => panic!("Unexpected match for dungeon theme."),
+            0 => DynamicMapTheme(DungeonTheme::new()),
+            _ => DynamicMapTheme(ForestTheme::new()),
         };
 
         mb
     }
 
-    fn fill(&mut self, tile: TileType) {
+    pub fn fill(&mut self, tile: TileType) {
         self.map.tiles.iter_mut().for_each(|t| *t = tile);
     }
 
-    fn find_most_distant(&self) -> Point {
+    pub fn find_most_distant(&self) -> Point {
+        const UNREACHABLE: &f32 = &std::f32::MAX;
+
         let dijkstra_map = DijkstraMap::new(
             SCREEN_WIDTH,
             SCREEN_HEIGHT,
-            &vec![self.map.point2d_to_index(self.player_start)],
+            &[self.map.point2d_to_index(self.player_start)],
             &self.map,
             1024.0,
         );
@@ -110,7 +111,7 @@ impl MapBuilder {
         use std::cmp::{max, min};
         for y in min(y1, y2)..=max(y1, y2) {
             if let Some(idx) = self.map.try_idx(Point::new(x, y)) {
-                self.map.tiles[idx as usize] = TileType::Floor;
+                self.map.tiles[idx] = TileType::Floor;
             }
         }
     }
@@ -119,7 +120,7 @@ impl MapBuilder {
         use std::cmp::{max, min};
         for x in min(x1, x2)..=max(x1, x2) {
             if let Some(idx) = self.map.try_idx(Point::new(x, y)) {
-                self.map.tiles[idx as usize] = TileType::Floor;
+                self.map.tiles[idx] = TileType::Floor;
             }
         }
     }
@@ -143,6 +144,9 @@ impl MapBuilder {
     }
 
     fn spawn_monsters(&self, start: &Point, rng: &mut RandomNumberGenerator) -> Vec<Point> {
+        const MIN_DISTANCE_TO_PLAYER: f32 = 10.0;
+        const NUM_MONSTERS: usize = 50;
+
         let mut spawnable_tiles: Vec<Point> = self
             .map
             .tiles
@@ -151,7 +155,7 @@ impl MapBuilder {
             .filter(|(idx, t)| {
                 **t == TileType::Floor
                     && DistanceAlg::Pythagoras.distance2d(*start, self.map.index_to_point2d(*idx))
-                        > 10.0
+                        > MIN_DISTANCE_TO_PLAYER
             })
             .map(|(idx, _)| self.map.index_to_point2d(idx))
             .collect();
@@ -159,7 +163,7 @@ impl MapBuilder {
         let mut spawns = Vec::new();
         for _ in 0..NUM_MONSTERS {
             let target_index = rng.random_slice_index(&spawnable_tiles).unwrap();
-            spawns.push(spawnable_tiles[target_index].clone());
+            spawns.push(spawnable_tiles[target_index]);
             spawnable_tiles.remove(target_index);
         }
 

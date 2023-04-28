@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+#[derive(Resource)]
 pub struct Camera {
     pub left_x: i32,
     pub right_x: i32,

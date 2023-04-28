@@ -1,37 +1,31 @@
 use crate::prelude::*;
 
-#[system]
-#[read_component(Point)]
-#[read_component(Name)]
-#[read_component(Health)]
-#[read_component(FieldOfView)]
-#[read_component(Player)]
-pub fn tooltips(ecs: &SubWorld, #[resource] mouse_pos: &Point, #[resource] camera: &Camera) {
-    const Z_ORDER: usize = 10100;
-
-    let mut positions = <(Entity, &Point, &Name)>::query();
-    let mut fov = <&FieldOfView>::query().filter(component::<Player>());
-    let player_fov = fov.iter(ecs).nth(0).unwrap();
-
+pub fn tooltips(
+    positions: Query<(&Position, &Name, Option<&Health>)>,
+    mouse_pos: Res<MousePosition>,
+    camera: Res<Camera>,
+    fov: Query<&FieldOfView, With<Player>>,
+) {
     let offset = Point::new(camera.left_x, camera.top_y);
-    let map_pos = *mouse_pos + offset;
+    let map_pos = mouse_pos.0 + offset;
+    let player_fov = fov.single();
 
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(HUD_LAYER);
 
     positions
-        .iter(ecs)
-        .filter(|(_, pos, _)| **pos == map_pos && player_fov.visible_tiles.contains(&pos))
-        .for_each(|(entity, _, name)| {
-            let screen_pos = *mouse_pos * HUD_DISPLAY_RATIO;
-            let display =
-                if let Ok(health) = ecs.entry_ref(*entity).unwrap().get_component::<Health>() {
-                    format!("{}: {} HP", &name.0, health.current)
-                } else {
-                    name.0.clone()
-                };
+        .iter()
+        .filter(|(pos, _, _)| pos.0 == map_pos && player_fov.visible_tiles.contains(&pos.0))
+        .for_each(|(_, name, health)| {
+            let screen_pos = mouse_pos.0 * HUD_DISPLAY_RATIO;
+            let display = if let Some(health) = health {
+                format!("{}: {} HP", name.0, health.current)
+            } else {
+                name.0.clone()
+            };
+
             draw_batch.print(screen_pos, &display);
         });
 
-    draw_batch.submit(Z_ORDER).expect("Batch error");
+    draw_batch.submit(10100).expect("Batch error");
 }

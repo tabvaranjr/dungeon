@@ -1,25 +1,20 @@
 use super::MapArchitect;
 use crate::prelude::*;
 
-pub struct DrunkardsWalkArchitect {}
-
 const STAGGER_DISTANCE: usize = 400;
 const NUM_TILES: usize = (SCREEN_WIDTH * SCREEN_HEIGHT) as usize;
 const DESIRED_FLOOR: usize = NUM_TILES / 3;
 
-impl DrunkardsWalkArchitect {
-    pub fn new() -> Self {
-        Self {}
-    }
+pub struct DrunkardsWalkArchitect;
 
+impl DrunkardsWalkArchitect {
     fn drunkard(&mut self, start: &Point, rng: &mut RandomNumberGenerator, map: &mut Map) {
-        let mut drunkard_pos = start.clone();
-        let mut stagger_distance = 0;
+        let mut drunkard_pos = *start;
+        let mut distance_staggered = 0;
 
         loop {
             let drunk_idx = map.point2d_to_index(drunkard_pos);
             map.tiles[drunk_idx] = TileType::Floor;
-
             match rng.range(0, 4) {
                 0 => drunkard_pos.x -= 1,
                 1 => drunkard_pos.x += 1,
@@ -31,8 +26,8 @@ impl DrunkardsWalkArchitect {
                 break;
             }
 
-            stagger_distance += 1;
-            if stagger_distance > STAGGER_DISTANCE {
+            distance_staggered += 1;
+            if distance_staggered > STAGGER_DISTANCE {
                 break;
             }
         }
@@ -47,7 +42,7 @@ impl MapArchitect for DrunkardsWalkArchitect {
             monster_spawns: Vec::new(),
             player_start: Point::zero(),
             amulet_start: Point::zero(),
-            theme: super::themes::DungeonTheme::new(),
+            theme: DynamicMapTheme(super::themes::DungeonTheme::new()),
         };
 
         mb.fill(TileType::Wall);
@@ -70,11 +65,10 @@ impl MapArchitect for DrunkardsWalkArchitect {
             let dijkstra_map = DijkstraMap::new(
                 SCREEN_WIDTH,
                 SCREEN_HEIGHT,
-                &vec![mb.map.point2d_to_index(center)],
+                &[mb.map.point2d_to_index(center)],
                 &mb.map,
                 1024.0,
             );
-
             dijkstra_map
                 .map
                 .iter()

@@ -1,4 +1,6 @@
-#[derive(Copy, Clone, Debug, PartialEq)]
+use crate::prelude::*;
+
+#[derive(Resource, Copy, Clone, Debug, PartialEq)]
 pub enum TurnState {
     AwaitingInput,
     PlayerTurn,
