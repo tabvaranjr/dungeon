@@ -34,7 +34,10 @@ pub fn combat(
                 let attacker_name = if is_player_attacker {
                     String::from("Player")
                 } else {
-                    let name = names.iter().find(|(e, _)| *e == event.attacker).map(|(_, n)| n);
+                    let name = names
+                        .iter()
+                        .find(|(e, _)| *e == event.attacker)
+                        .map(|(_, n)| n);
                     if let Some(name) = name {
                         name.0.clone()
                     } else {
@@ -45,7 +48,10 @@ pub fn combat(
                 let victim_name = if is_player_victim {
                     String::from("Player")
                 } else {
-                    let name = names.iter().find(|(e, _)| *e == event.victim).map(|(_, n)| n);
+                    let name = names
+                        .iter()
+                        .find(|(e, _)| *e == event.victim)
+                        .map(|(_, n)| n);
                     if let Some(name) = name {
                         name.0.clone()
                     } else {
