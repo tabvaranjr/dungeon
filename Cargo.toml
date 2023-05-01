@@ -8,7 +8,7 @@ edition = "2021"
 
 [dependencies]
 bracket-lib = { version = "~0.8.1" }
-bevy_ecs = { version = "~0.9.0" }
+bevy_ecs = { version = "~0.10.0" }
 serde = { version = "1" }
 ron = { version = "~0.8.0" }
 

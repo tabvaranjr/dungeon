@@ -13,35 +13,35 @@ mod random_move;
 mod tooltips;
 mod use_items;
 
-#[derive(StageLabel)]
-enum Stages {
-    Update,
-    Render,
-    Move,
-    Combat,
-    Events,
-    FieldOfView,
-}
+use bevy_ecs::schedule::*;
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
+pub struct FlushEvents;
 
 pub fn build_input_scheduler() -> Schedule {
     let mut scheduler = Schedule::default();
 
-    scheduler.add_stage(Stages::Events, create_event_stage());
-
-    scheduler.add_stage(
-        Stages::Update,
-        SystemStage::parallel()
-            .with_system(player_input::player_input)
-            .with_system(fov::fov),
+    scheduler.add_systems(
+        (
+            Events::<WantsToMove>::update_system,
+            Events::<WantsToAttack>::update_system,
+            Events::<ActivateItem>::update_system,
+        )
+            .in_set(FlushEvents),
     );
 
-    scheduler.add_stage(
-        Stages::Render,
-        SystemStage::parallel()
-            .with_system(map_render::map_render)
-            .with_system(entity_render::entity_render)
-            .with_system(tooltips::tooltips)
-            .with_system(hud::hud),
+    scheduler.add_systems(
+        (
+            player_input::player_input,
+            fov::fov,
+            apply_system_buffers,
+            map_render::map_render,
+            entity_render::entity_render,
+            tooltips::tooltips,
+            hud::hud,
+        )
+            .chain()
+            .after(FlushEvents),
     );
 
     scheduler
@@ -50,32 +50,31 @@ pub fn build_input_scheduler() -> Schedule {
 pub fn build_player_scheduler() -> Schedule {
     let mut scheduler = Schedule::default();
 
-    scheduler.add_stage(Stages::Events, create_event_stage());
-
-    scheduler.add_stage(
-        Stages::Combat,
-        SystemStage::parallel()
-            .with_system(use_items::use_items)
-            .with_system(combat::combat),
+    scheduler.add_systems(
+        (
+            Events::<WantsToMove>::update_system,
+            Events::<WantsToAttack>::update_system,
+            Events::<ActivateItem>::update_system,
+        )
+            .in_set(FlushEvents),
     );
 
-    scheduler.add_stage(
-        Stages::Move,
-        SystemStage::parallel().with_system(movement::movement),
-    );
-
-    scheduler.add_stage(
-        Stages::FieldOfView,
-        SystemStage::parallel().with_system(fov::fov),
-    );
-
-    scheduler.add_stage(
-        Stages::Render,
-        SystemStage::parallel()
-            .with_system(map_render::map_render)
-            .with_system(entity_render::entity_render)
-            .with_system(hud::hud)
-            .with_system(end_turn::end_turn),
+    scheduler.add_systems(
+        (
+            use_items::use_items,
+            combat::combat,
+            apply_system_buffers,
+            movement::movement,
+            apply_system_buffers,
+            fov::fov,
+            apply_system_buffers,
+            map_render::map_render,
+            entity_render::entity_render,
+            hud::hud,
+            end_turn::end_turn,
+        )
+            .chain()
+            .after(FlushEvents),
     );
 
     scheduler
@@ -84,47 +83,35 @@ pub fn build_player_scheduler() -> Schedule {
 pub fn build_monster_scheduler() -> Schedule {
     let mut scheduler = Schedule::default();
 
-    scheduler.add_stage(Stages::Events, create_event_stage());
-
-    scheduler.add_stage(
-        Stages::Update,
-        SystemStage::parallel()
-            .with_system(random_move::random_move)
-            .with_system(chasing::chasing),
+    scheduler.add_systems(
+        (
+            Events::<WantsToMove>::update_system,
+            Events::<WantsToAttack>::update_system,
+            Events::<ActivateItem>::update_system,
+        )
+            .in_set(FlushEvents),
     );
 
-    scheduler.add_stage(
-        Stages::Combat,
-        SystemStage::parallel()
-            .with_system(use_items::use_items)
-            .with_system(combat::combat),
-    );
-
-    scheduler.add_stage(
-        Stages::Move,
-        SystemStage::parallel().with_system(movement::movement),
-    );
-
-    scheduler.add_stage(
-        Stages::FieldOfView,
-        SystemStage::parallel().with_system(fov::fov),
-    );
-
-    scheduler.add_stage(
-        Stages::Render,
-        SystemStage::parallel()
-            .with_system(map_render::map_render)
-            .with_system(entity_render::entity_render)
-            .with_system(hud::hud)
-            .with_system(end_turn::end_turn),
+    scheduler.add_systems(
+        (
+            random_move::random_move,
+            chasing::chasing,
+            apply_system_buffers,
+            use_items::use_items,
+            combat::combat,
+            apply_system_buffers,
+            movement::movement,
+            apply_system_buffers,
+            fov::fov,
+            apply_system_buffers,
+            map_render::map_render,
+            entity_render::entity_render,
+            hud::hud,
+            end_turn::end_turn,
+        )
+            .chain()
+            .after(FlushEvents),
     );
 
     scheduler
-}
-
-fn create_event_stage() -> SystemStage {
-    SystemStage::parallel()
-        .with_system(Events::<WantsToMove>::update_system)
-        .with_system(Events::<WantsToAttack>::update_system)
-        .with_system(Events::<ActivateItem>::update_system)
 }

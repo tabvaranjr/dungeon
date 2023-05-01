@@ -14,7 +14,7 @@ impl State {
         let mut map_builder = MapBuilder::new(&mut rng);
 
         spawn_player(&mut ecs, map_builder.player_start);
-        
+
         spawn_level(&mut ecs, &mut rng, 0, &map_builder.monster_spawns);
 
         let exit_idx = map_builder.map.point2d_to_index(map_builder.amulet_start);
@@ -29,11 +29,15 @@ impl State {
         ecs.insert_resource(Events::<WantsToAttack>::default());
         ecs.insert_resource(Events::<ActivateItem>::default());
 
+        let input_systems = build_input_scheduler();
+        let player_systems = build_player_scheduler();
+        let monster_systems = build_monster_scheduler();
+
         Self {
             ecs,
-            input_systems: build_input_scheduler(),
-            player_systems: build_player_scheduler(),
-            monster_systems: build_monster_scheduler(),
+            input_systems,
+            player_systems,
+            monster_systems,
         }
     }
 
@@ -135,10 +139,10 @@ impl State {
                 entities_to_keep.insert(e);
             });
 
-        let all_entities: Vec<Entity> = self.ecs.iter_entities().collect();
-        for e in all_entities.iter() {
-            if !entities_to_keep.contains(e) {
-                self.ecs.despawn(*e);
+        let all_entities: Vec<Entity> = self.ecs.query::<Entity>().iter(&self.ecs).collect();
+        for e in all_entities {
+            if !entities_to_keep.contains(&e) {
+                self.ecs.despawn(e);
             }
         }
 
